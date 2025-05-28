@@ -22,18 +22,12 @@ function useUserLocation() {
 const NAVBAR_HEIGHT = 72; // px
 
 export default function MainPage() {
-  // THEME COLORS
-  const mainBg = "#1A2420";
-  const cardBg = "#384D48";
-  const cardAlt = "#4A5D57";
-  const textMain = "#F5F5F5";
-  const textSub = "#D0D0D0";
-
   // Side panel state
   const [sideOpen, setSideOpen] = useState(false);
   const [sideWidth, setSideWidth] = useState(380);
   const [isResizing, setIsResizing] = useState(false);
   const [sideCollapsed, setSideCollapsed] = useState(true);
+  const [isMobileView, setIsMobileView] = useState(false);
 
   // Main message state
   const [input, setInput] = useState("");
@@ -96,23 +90,33 @@ export default function MainPage() {
   // Responsive side panel width
   useEffect(() => {
     function handleResize() {
-      const width = Math.max(320, Math.min(window.innerWidth * 0.4, 600));
-      setSideWidth(width);
+      const mobile = window.innerWidth < 768;
+      setIsMobileView(mobile);
+      if (mobile) { 
+        setSideWidth(window.innerWidth * 0.9); // Take 90% of screen width on mobile
+      } else {
+        const width = Math.max(320, Math.min(window.innerWidth * 0.4, 600));
+        setSideWidth(width);
+      }
     }
-    handleResize();
+    handleResize(); // Call on initial mount
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
-  // Panel resizing (for desktop)
+
+  // Panel resizing (for desktop) - ensure this only runs on desktop
   useEffect(() => {
     const handleMouseMove = (e) => {
-      if (!isResizing || sideCollapsed) return;
+      if (isMobileView || !isResizing || sideCollapsed) return;
       let newWidth = window.innerWidth - e.clientX;
       newWidth = Math.max(320, Math.min(newWidth, 600));
       setSideWidth(newWidth);
     };
-    const handleMouseUp = () => setIsResizing(false);
-    if (isResizing) {
+    const handleMouseUp = () => {
+      if (isMobileView) return;
+      setIsResizing(false);
+    };
+    if (isResizing && !isMobileView) {
       window.addEventListener("mousemove", handleMouseMove);
       window.addEventListener("mouseup", handleMouseUp);
     }
@@ -121,6 +125,7 @@ export default function MainPage() {
       window.removeEventListener("mouseup", handleMouseUp);
     };
   }, [isResizing, sideCollapsed]);
+
   // Keyboard shortcut for collapse
   useEffect(() => {
     const handleKey = (e) => {
@@ -135,67 +140,6 @@ export default function MainPage() {
   useEffect(() => {
     setSideOpen(false);
     setSideCollapsed(true);
-  }, []);
-
-  // Animation CSS (use only the transitions you had, plus slide-up and card appear)
-  useEffect(() => {
-    if (typeof window !== "undefined" && !document.getElementById("msgbox-fadeup-style")) {
-      const style = document.createElement("style");
-      style.id = "msgbox-fadeup-style";
-      style.innerHTML = `
-        .msgbox-rest {
-          transition: transform 0.8s linear;
-          transform: translateY(0);
-          z-index: 4;
-        }
-        .msgbox-lift {
-          transition: transform 0.8s linear;
-          transform: translateY(-32px);
-          z-index: 4;
-        }
-        .quote-fade-in {
-          opacity: 1;
-          transition: opacity 0.8s linear;
-        }
-        .quote-fade-out {
-          opacity: 0;
-          transition: opacity 0.8s linear;
-        }
-        .main-card-appear {
-          animation: fadeinCardMain 0.42s ease;
-        }
-        .slide-up-content {
-          opacity: 1;
-          transform: translateY(90px);
-          transition: transform 0.7s cubic-bezier(.23,1.07,.37,1.01), opacity 0.7s cubic-bezier(.23,1.07,.37,1.01);
-        }
-        .slide-up-content.slide {
-          opacity: 1;
-          transform: translateY(0px);
-        }
-        .main-card-appear-below {
-          animation: fadeinCardBelow 0.55s cubic-bezier(.23,1.07,.37,1.01);
-        }
-        @keyframes fadeinCardMain {
-          from { opacity: 0; transform: translateY(32px);}
-          to   { opacity: 1; transform: translateY(0);}
-        }
-        @keyframes fadeinCardBelow {
-          from { opacity: 0; transform: translateY(56px);}
-          to   { opacity: 1; transform: translateY(0);}
-        }
-        @media (max-width: 600px) {
-          .msgbox-rest, .msgbox-lift {
-            width: 96vw !important;
-            min-width: 0 !important;
-            max-width: 99vw !important;
-            left: 0;
-            padding: 0.5rem 2vw;
-          }
-        }
-      `;
-      document.head.appendChild(style);
-    }
   }, []);
 
   // Slide up content block after sending a message
@@ -315,93 +259,37 @@ export default function MainPage() {
 
   return (
     <div
-      style={{
-        display: "flex",
-        height: "100vh",
-        width: "100vw",
-        overflow: "hidden",
-        position: "relative",
-        background: mainBg,
-      }}
+      className="h-screen w-screen overflow-hidden relative bg-[#1A2420] md:flex" // Use flex on md+ for side-by-side
     >
       {/* Main Content */}
       <main
+        className="min-h-screen flex flex-col items-center justify-start min-w-0 relative box-border bg-[#1A2420] transition-all duration-200 ease-linear w-full md:w-auto" // Adjusted width classes
         style={{
-          width: `calc(100vw - ${(sideOpen && !sideCollapsed) ? sideWidth : 0}px)`,
-          transition: "width 0.2s ease",
-          minHeight: "100vh",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "flex-start",
-          minWidth: 0,
-          position: "relative",
-          boxSizing: "border-box",
-          background: mainBg,
           paddingTop: `${NAVBAR_HEIGHT + 16}px`,
+          width: (!isMobileView && sideOpen && !sideCollapsed) 
+                 ? `calc(100vw - ${sideWidth}px)` 
+                 : '100vw',
         }}
       >
         {/* Quote Heading */}
         <div
-          className={quoteFading ? "quote-fade-out" : "quote-fade-in"}
-          style={{
-            fontSize: "2.4rem",
-            fontWeight: 700,
-            color: textMain,
-            marginBottom: 48,
-            marginTop: 10,
-            letterSpacing: "0.01em",
-            textAlign: "center",
-            zIndex: 2,
-            width: "100%",
-            userSelect: "none",
-          }}
+          className={`text-2xl sm:text-3xl md:text-[2.4rem] font-bold text-[#F5F5F5] mb-8 sm:mb-10 md:mb-12 mt-6 sm:mt-8 md:mt-10 tracking-[0.01em] text-center z-[2] w-full select-none px-4 sm:px-6 md:px-4 ${quoteFading ? "quote-fade-out" : "quote-fade-in"}`}
         >
           Beyond the Surface : The Real Cost
         </div>
 
         {/* All content below quote block */}
         <div
-          className={`slide-up-content${contentSlideUp ? " slide" : ""}`}
-          style={{
-            width: "100%",
-            maxWidth: 540,
-            margin: "0 auto",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            opacity: 1,
-          }}
+          className={`w-full max-w-full px-4 sm:max-w-lg md:max-w-xl mx-auto flex flex-col items-center opacity-100 slide-up-content${contentSlideUp ? " slide" : ""}`}
         >
           {/* Input bar with send button */}
           <form
-            className={msgBoxLifted ? "msgbox-lift" : "msgbox-rest"}
-            style={{
-              width: "100%",
-              maxWidth: 500,
-              display: "flex",
-              flexDirection: "row",
-              alignItems: "center",
-              background: cardBg,
-              borderRadius: 8,
-              boxShadow: "0 1px 8px 0 #1a237e16",
-              padding: "0.5rem 1.2rem",
-              zIndex: 6,
-              color: textMain,
-            }}
+            className={`w-full max-w-full sm:max-w-md md:max-w-lg flex flex-row items-center bg-[#384D48] rounded-lg shadow-[0_1px_8px_0_#1a237e16] p-2 sm:px-5 sm:py-2 z-[6] text-[#F5F5F5] ${msgBoxLifted ? "msgbox-lift" : "msgbox-rest"}`}
             onSubmit={handleSendMain}
             autoComplete="off"
           >
             <input
-              style={{
-                border: "none",
-                width: "100%",
-                height: 42,
-                fontSize: 18,
-                outline: "none",
-                background: "transparent",
-                color: textMain,
-              }}
+              className="border-none w-full h-[42px] text-lg outline-none bg-transparent text-[#F5F5F5]"
               type="text"
               placeholder="Start your query..."
               value={input}
@@ -409,14 +297,7 @@ export default function MainPage() {
               disabled={mainLoading}
             />
             <button
-              style={{
-                background: "none",
-                border: "none",
-                padding: "0 0 0 10px",
-                cursor: !input.trim() || mainLoading ? "not-allowed" : "pointer",
-                display: "flex",
-                alignItems: "center",
-              }}
+              className={`bg-none border-none p-0 pl-[10px] flex items-center ${!input.trim() || mainLoading ? "cursor-not-allowed" : "cursor-pointer"}`}
               type="submit"
               aria-label="Send"
               disabled={!input.trim() || mainLoading}
@@ -431,48 +312,25 @@ export default function MainPage() {
           {/* Card (response) */}
           {showCard && (
             <div
-              className="main-card-appear"
-              style={{
-                width: "100%",
-                maxWidth: 500,
-                marginTop: 22,
-                minHeight: 80,
-                zIndex: 2,
-              }}
+              className="main-card-appear w-full max-w-[500px] mt-[22px] min-h-[80px] z-[2]"
             >
               {mainLoading ? (
-                <div style={{ padding: "2rem", color: "#888", textAlign: "center" }}>Loading...</div>
+                <div className="p-6 sm:p-8 text-[#888] text-center">Loading...</div>
               ) : mainCard && typeof mainCard === "object" && mainCard !== null && mainCard.hasOwnProperty("rating") ? (
                 <Card card={mainCard} />
               ) : mainCard && mainCard.error ? (
-                <div style={{ color: "#ff6666", background: cardBg, borderRadius: 8, padding: "1.2rem", textAlign: "center" }}>{mainCard.error}</div>
+                <div className="text-[#ff6666] bg-[#384D48] rounded-lg p-4 sm:p-5 text-center">{mainCard.error}</div>
               ) : null}
             </div>
           )}
 
           {/* Recent cards section */}
-          <div style={{
-            width: "100%",
-            maxWidth: 540,
-            marginTop: 36,
-          }}>
-            <h2 style={{
-              color: textMain,
-              fontSize: 22,
-              fontWeight: 600,
-              marginBottom: 16,
-              letterSpacing: "0.01em",
-            }}>
+          <div className="w-full max-w-full sm:max-w-lg md:max-w-xl mt-8 md:mt-9">
+            <h2 className="text-xl sm:text-[22px] text-[#F5F5F5] font-semibold mb-3 sm:mb-4 tracking-[0.01em]">
               Your Recent Analyses
             </h2>
             {cardsLoading ? (
-              <div style={{
-                background: cardBg,
-                color: textSub,
-                borderRadius: 10,
-                padding: "2rem",
-                textAlign: "center"
-              }}>
+              <div className="bg-[#384D48] text-[#D0D0D0] rounded-[10px] p-6 sm:p-8 text-center">
                 Loading...
               </div>
             ) : (userCards && userCards.length > 0 ? (
@@ -480,27 +338,14 @@ export default function MainPage() {
                 card && typeof card === "object" && card.hasOwnProperty("rating") ? (
                   <div
                     key={card._id || idx}
-                    className={cardAppear && idx === 0 ? "main-card-appear-below" : ""}
-                    style={{
-                      marginBottom: 24,
-                      background: cardBg,
-                      borderRadius: 14,
-                      boxShadow: "0 1px 8px 0 #1a237e16",
-                      overflow: "hidden",
-                    }}
+                    className={`mb-4 sm:mb-6 bg-[#384D48] rounded-[14px] shadow-[0_1px_8px_0_#1a237e16] overflow-hidden ${cardAppear && idx === 0 ? "main-card-appear-below" : ""}`}
                   >
                     <Card card={card} />
                   </div>
                 ) : null
               ))
             ) : (
-              <div style={{
-                background: cardBg,
-                color: textSub,
-                borderRadius: 10,
-                padding: "2rem",
-                textAlign: "center"
-              }}>
+              <div className="bg-[#384D48] text-[#D0D0D0] rounded-[10px] p-6 sm:p-8 text-center">
                 No recent analyses found.
               </div>
             ))}
@@ -509,25 +354,11 @@ export default function MainPage() {
       </main>
       {/* Slide Button (expand/collapse) */}
       <button
-        style={{
-          position: "fixed",
-          top: "50%",
-          right: sideCollapsed ? 14 : sideWidth + 14,
-          transform: "translateY(-50%)",
-          zIndex: 35,
-          background: mainBg,
-          border: "1.5px solid #384D48",
-          borderRadius: 9,
-          width: 40,
-          height: 40,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          boxShadow: "0 2px 14px 0 rgba(60,64,67,0.10)",
-          cursor: "pointer",
-          transition: "right 0.24s ease, box-shadow 0.2s",
-          padding: 0,
-          opacity: 1,
+        className={`fixed top-1/2 -translate-y-1/2 z-40 bg-[#1A2420] border-[1.5px] border-[#384D48] rounded-lg w-10 h-10 items-center justify-center shadow-lg cursor-pointer transition-all duration-200 ease-linear p-0 opacity-100 md:z-35 ${ (isMobileView && sideOpen && !sideCollapsed) ? 'hidden' : 'flex' }`}
+        style={{ 
+          right: sideCollapsed 
+            ? 14 
+            : (isMobileView && sideOpen ? sideWidth - 10 : sideWidth + 14)
         }}
         onClick={sideCollapsed ? handleExpand : handleCollapse}
         aria-label={sideCollapsed ? "Show General Talk" : "Hide General Talk"}
@@ -540,144 +371,92 @@ export default function MainPage() {
             strokeWidth="2.2"
             strokeLinecap="round"
             strokeLinejoin="round"
-            style={{
-              transform: !sideCollapsed ? "rotate(0deg)" : "rotate(180deg)",
-              transformOrigin: "50% 50%",
-              transition: "transform 0.2s",
-            }}
+            className={`transition-transform duration-200 origin-center ${!sideCollapsed ? "rotate-0" : "rotate-180"}`}
           />
         </svg>
       </button>
       {/* Side Section: General Talk */}
       <aside
+        className={`h-screen overflow-hidden flex flex-col bg-[#384D48] border-l border-[#4A5D57] transition-all duration-300 ease-in-out
+                    fixed inset-y-0 right-0 z-50 md:z-30 md:relative md:translate-x-0 
+                    ${sideOpen && !sideCollapsed ? 'translate-x-0 shadow-xl md:shadow-lg' : 'translate-x-full md:translate-x-0'}
+                    ${sideCollapsed && sideOpen ? 'md:w-[0px] opacity-0 md:opacity-100' : 'md:w-auto' }`}
         style={{
-          position: "fixed",
-          top: 0,
-          right: 0,
-          height: "100vh",
-          width: sideWidth,
-          minWidth: 320,
-          maxWidth: 600,
-          background: cardBg,
-          boxShadow: (!sideCollapsed)
-            ? "rgba(60,64,67,0.12) 0px 1.5px 12px 0px"
-            : "none",
-          overflow: "hidden",
-          display: "flex",
-          flexDirection: "column",
-          zIndex: 30,
-          transform: sideCollapsed
-            ? `translateX(${sideWidth - 40}px)`
-            : "translateX(0)",
-          opacity: !sideCollapsed ? 1 : 0,
-          pointerEvents: !sideCollapsed ? "all" : "none",
-          transition:
-            "transform 0.24s ease, width 0.2s ease, opacity 0.15s",
-          borderLeft: `1px solid ${cardAlt}`,
+          width: isMobileView 
+                 ? (sideOpen && !sideCollapsed ? sideWidth : 0)
+                 : sideWidth,
+          minWidth: isMobileView 
+                    ? (sideOpen && !sideCollapsed ? Math.min(320, sideWidth) : 0) 
+                    : (sideCollapsed && sideOpen ? 0 : 320), // if fully collapsed on desktop via JS, it's 0, else 320.
+                                                              // sideCollapsed && sideOpen is the 240ms transition to 0 effective width.
+          maxWidth: isMobileView ? '100vw' : 600,
+          boxShadow: (!sideCollapsed && sideOpen) ? "rgba(60,64,67,0.12) 0px 1.5px 12px 0px" : "none",
         }}
         tabIndex={!sideCollapsed ? 0 : -1}
-        aria-hidden={sideCollapsed}
+        aria-hidden={sideCollapsed && isMobileView}
       >
-        {/* Drag Resizer, disabled when collapsed */}
+        {/* Drag Resizer, disabled when collapsed or on mobile */}
         {!sideCollapsed && (
           <div
-            style={{
-              width: 6,
-              cursor: sideCollapsed ? "default" : "ew-resize",
-              background: sideCollapsed ? "transparent" : "#4A5D57",
-              position: "absolute",
-              left: -3,
-              top: 0,
-              bottom: 0,
-              zIndex: 31,
-            }}
-            onMouseDown={() => !sideCollapsed && setIsResizing(true)}
+            className={`w-[6px] absolute left-[-3px] top-0 bottom-0 z-31 hidden md:block ${sideCollapsed ? "cursor-default bg-transparent" : "cursor-ew-resize bg-[#4A5D57]"}`}
+            onMouseDown={() => !sideCollapsed && !isMobileView && setIsResizing(true)}
             title="Resize"
           />
         )}
-        {!sideCollapsed && (
-          <button
-            style={{
-              position: "absolute",
-              right: 12,
-              top: 12,
-              background: "none",
-              border: "none",
-              fontSize: 22,
-              cursor: "pointer",
-              color: "#9BC53D",
-              zIndex: 32,
-              opacity: 0.85,
-            }}
-            onClick={handleCollapse}
-            aria-label="Collapse"
-            title="Collapse"
-          >
-            ×
-          </button>
-        )}
-        {!sideCollapsed && (
-          <>
+        {/* Content of the side panel */}
+        {/* Show content only if not collapsed, or if on desktop (where "collapsed" means narrow) */}
+        {(!sideCollapsed || (typeof window !== 'undefined' && window.innerWidth >= 768)) && ( 
+          <div className={`flex flex-col h-full transition-opacity duration-150 ease-in-out ${sideCollapsed && sideOpen && (typeof window !== 'undefined' && window.innerWidth >=768) ? 'opacity-0 md:opacity-100 delay-100' : 'opacity-100'}`}>
+            {/* Close button for mobile overlay */}
+            {sideOpen && !sideCollapsed && typeof window !== 'undefined' && window.innerWidth < 768 && (
+              <button
+                className="absolute right-3 top-3 bg-transparent border-none text-3xl cursor-pointer text-[#9BC53D] z-50 p-2"
+                onClick={handleCollapse}
+                aria-label="Close General Talk"
+                title="Close General Talk"
+              >
+                &times;
+              </button>
+            )}
+             {/* Desktop Collapse Button (Original X) - hidden on mobile for overlay, shown when not collapsed on desktop */}
+            {!sideCollapsed && (typeof window !== 'undefined' && window.innerWidth >= 768) && (
+              <button
+                className="absolute right-3 top-3 bg-none border-none text-[22px] cursor-pointer text-[#9BC53D] z-32 opacity-85"
+                onClick={handleCollapse}
+                aria-label="Collapse"
+                title="Collapse"
+              >
+                ×
+              </button>
+            )}
             <div
-              style={{
-                padding: "1.2rem 1.5rem 1rem 1.5rem",
-                fontWeight: 600,
-                fontSize: 19,
-                borderBottom: `1px solid ${cardAlt}`,
-                background: cardBg,
-                color: textMain,
-              }}
+              className="px-4 sm:px-6 py-4 sm:py-5 pb-3 sm:pb-4 font-semibold text-md sm:text-lg border-b border-[#4A5D57] bg-[#384D48] text-[#F5F5F5]"
             >
               General Talk
             </div>
             <div
-              style={{
-                flex: 1,
-                overflowY: "auto",
-                padding: "1.2rem",
-                fontSize: 15.5,
-                color: textMain,
-                background: cardAlt,
-              }}
+              className="flex-1 overflow-y-auto p-5 text-[15.5px] text-[#F5F5F5] bg-[#4A5D57]"
             >
-              <p style={{ margin: 0, color: textSub }}>
+              <p className="m-0 text-[#D0D0D0]">
                 Welcome to the General Talk section! You can use this space to chat, ask questions, or discuss anything related to climate change.
               </p>
-              <div style={{ marginTop: 18 }}>
+              <div className="mt-[18px]">
                 {sideMessages.map((msg, idx) => (
-                  <div key={idx} style={{ marginBottom: 14 }}>
+                  <div key={idx} className="mb-[14px]">
                     <div
-                      style={{
-                        fontSize: 13.5,
-                        color: "#9BC53D",
-                        marginBottom: 4,
-                        fontWeight: 500,
-                        whiteSpace: "pre-line",
-                        wordBreak: "break-word",
-                      }}
+                      className="text-[13.5px] text-[#9BC53D] mb-1 font-medium whitespace-pre-line break-words"
                     >
                       {msg.user}
                     </div>
                     {msg.response ? (
                       <div
-                        style={{
-                          fontSize: 15.5,
-                          color: textMain,
-                          background: cardBg,
-                          padding: "0.7rem 1rem",
-                          borderRadius: 7,
-                          boxShadow: "0 1px 4px 0 #1a237e0e",
-                        }}
+                        className="text-[15.5px] text-[#F5F5F5] bg-[#384D48] py-[0.7rem] px-4 rounded-[7px] shadow-[0_1px_4px_0_#1a237e0e]"
                       >
                         {msg.response}
                       </div>
                     ) : (
                       <div
-                        style={{
-                          fontSize: 15,
-                          color: textSub,
-                          padding: "0.7rem 1rem",
-                        }}
+                        className="text-[15px] text-[#D0D0D0] py-[0.7rem] px-4"
                       >
                         Loading...
                       </div>
@@ -688,30 +467,12 @@ export default function MainPage() {
             </div>
             {/* Side panel query input and send button */}
             <form
-              style={{
-                width: "100%",
-                background: cardAlt,
-                padding: "1rem 1.2rem",
-                borderTop: `1px solid ${cardAlt}`,
-                display: "flex",
-                alignItems: "center",
-                gap: 8,
-              }}
+              className="w-full bg-[#4A5D57] p-4 pt-3 border-t border-[#4A5D57] flex items-center gap-2"
               onSubmit={handleSendSide}
               autoComplete="off"
             >
               <input
-                style={{
-                  border: "none",
-                  background: cardBg,
-                  borderRadius: 6,
-                  fontSize: 16,
-                  padding: "0.6rem 1rem",
-                  flex: 1,
-                  outline: "none",
-                  boxShadow: "0 0.5px 7px 0 rgba(60,64,67,0.07)",
-                  color: textMain,
-                }}
+                className="border-none bg-[#384D48] rounded-[6px] text-base py-[0.6rem] px-4 flex-1 outline-none shadow-[0_0.5px_7px_0_rgba(60,64,67,0.07)] text-[#F5F5F5]"
                 type="text"
                 placeholder="Type a message..."
                 value={sideInput}
@@ -719,14 +480,7 @@ export default function MainPage() {
                 disabled={sideLoading}
               />
               <button
-                style={{
-                  background: "none",
-                  border: "none",
-                  padding: "0 0 0 10px",
-                  cursor: !sideInput.trim() || sideLoading ? "not-allowed" : "pointer",
-                  display: "flex",
-                  alignItems: "center",
-                }}
+                className={`bg-none border-none p-0 pl-[10px] flex items-center ${!sideInput.trim() || sideLoading ? "cursor-not-allowed" : "cursor-pointer"}`}
                 type="submit"
                 aria-label="Send"
                 disabled={!sideInput.trim() || sideLoading}

@@ -8,6 +8,7 @@ export default function Navbar() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [username, setUsername] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const router = useRouter();
   const pathname = usePathname(); // Add this to detect route changes
 
@@ -120,108 +121,128 @@ export default function Navbar() {
 
   if (isLoading) {
     return (
-      <nav className="fixed top-0 left-0 w-full z-50 py-3 px-6 border-b" style={{ 
-        backgroundColor: '#384D48',
-        borderColor: '#4A5D57'
-      }}>
+      <nav className="fixed top-0 left-0 w-full z-50 py-3 px-6 border-b bg-[#384D48] border-[#4A5D57]">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
-          <div className="h-6 w-16 rounded animate-pulse" style={{ backgroundColor: '#4A5D57' }}></div>
-          <div className="h-6 w-20 rounded animate-pulse" style={{ backgroundColor: '#4A5D57' }}></div>
+          <div className="h-6 w-16 rounded animate-pulse bg-[#4A5D57]"></div>
+          <div className="h-6 w-20 rounded animate-pulse bg-[#4A5D57]"></div>
         </div>
       </nav>
     );
   }
 
   return (
-    <nav className="fixed top-0 left-0 w-full z-50 py-3 px-6 border-b shadow-lg" style={{ 
-      backgroundColor: '#384D48',
-      borderColor: '#4A5D57'
-    }}>
+    <nav className="fixed top-0 left-0 w-full z-50 py-3 px-6 border-b shadow-lg bg-[#384D48] border-[#4A5D57]">
       <div className="max-w-7xl mx-auto flex justify-between items-center">
         {/* Logo/Brand Name */}
         <Link 
           href="/" 
-          className="text-xl font-bold transition-colors duration-200 hover:no-underline"
-          style={{ color: '#F5F5F5' }}
-          onMouseEnter={(e) => e.target.style.color = '#9BC53D'}
-          onMouseLeave={(e) => e.target.style.color = '#F5F5F5'}
+          className="text-xl font-bold transition-colors duration-200 hover:no-underline text-[#F5F5F5] hover:text-[#9BC53D]"
         >
           NAME
         </Link>
 
-        {/* Right Side Navigation */}
-        <div className="flex items-center space-x-4">
+        {/* Hamburger Menu Button - visible on mobile, hidden on md and up */}
+        <div className="md:hidden">
+          <button
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            aria-label="Toggle mobile menu"
+            className="text-[#F5F5F5] hover:text-[#9BC53D] focus:outline-none"
+          >
+            <svg
+              className="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              {isMobileMenuOpen ? (
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              ) : (
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 6h16M4 12h16m-7 6h7"
+                />
+              )}
+            </svg>
+          </button>
+        </div>
+
+        {/* Desktop Right Side Navigation - hidden on mobile, visible on md and up */}
+        <div className="hidden md:flex items-center space-x-4">
           {isLoggedIn ? (
             <>
-              {/* Welcome Message */}
-              <span className="text-base font-medium hidden sm:inline" style={{ color: '#D0D0D0' }}>
+              <span className="text-base font-medium hidden sm:inline text-[#D0D0D0]"> {/* sm:inline here is fine as this whole div is md:flex */}
                 Welcome, {username}
               </span>
-              
-              {/* Dashboard Link */}
               <Link 
                 href="/dashboard" 
-                className="px-3 py-1.5 rounded-md font-medium transition-all duration-200 hover:no-underline text-sm"
-                style={{ 
-                  color: '#F5F5F5',
-                  backgroundColor: '#4A5D57'
-                }}
-                onMouseEnter={(e) => {
-                  e.target.style.backgroundColor = '#7FB069';
-                  e.target.style.color = '#1A2B24';
-                }}
-                onMouseLeave={(e) => {
-                  e.target.style.backgroundColor = '#4A5D57';
-                  e.target.style.color = '#F5F5F5';
-                }}
+                className="px-3 py-1.5 rounded-md font-medium transition-all duration-200 hover:no-underline text-sm text-[#F5F5F5] bg-[#4A5D57] hover:bg-[#7FB069] hover:text-[#1A2B24]"
               >
                 Dashboard
               </Link>
-
-              {/* Logout Button */}
               <button
                 onClick={handleLogout}
-                className="px-3 py-1.5 rounded-md font-medium transition-all duration-200 hover:scale-105 text-sm"
-                style={{ 
-                  backgroundColor: '#7FB069',
-                  color: '#1A2B24',
-                  border: 'none'
-                }}
-                onMouseEnter={(e) => {
-                  e.target.style.backgroundColor = '#9BC53D';
-                  e.target.style.boxShadow = '0 4px 12px rgba(155, 197, 61, 0.3)';
-                }}
-                onMouseLeave={(e) => {
-                  e.target.style.backgroundColor = '#7FB069';
-                  e.target.style.boxShadow = 'none';
-                }}
+                className="px-3 py-1.5 rounded-md font-medium transition-all duration-200 hover:scale-105 text-sm bg-[#7FB069] text-[#1A2B24] border-none hover:bg-[#9BC53D] hover:shadow-[0_4px_12px_rgba(155,197,61,0.3)]"
               >
                 Logout
               </button>
             </>
           ) : (
-            /* Login Link */
             <Link 
               href="/login" 
-              className="px-3 py-1.5 rounded-md font-medium transition-all duration-200 hover:no-underline hover:scale-105 text-sm"
-              style={{ 
-                backgroundColor: '#7FB069',
-                color: '#1A2B24'
-              }}
-              onMouseEnter={(e) => {
-                e.target.style.backgroundColor = '#9BC53D';
-                e.target.style.boxShadow = '0 4px 12px rgba(155, 197, 61, 0.3)';
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.backgroundColor = '#7FB069';
-                e.target.style.boxShadow = 'none';
-              }}
+              className="px-3 py-1.5 rounded-md font-medium transition-all duration-200 hover:no-underline hover:scale-105 text-sm bg-[#7FB069] text-[#1A2B24] hover:bg-[#9BC53D] hover:shadow-[0_4px_12px_rgba(155,197,61,0.3)]"
             >
               Login
             </Link>
           )}
         </div>
       </div>
+
+      {/* Mobile Menu - shown/hidden based on state, hidden on md and up */}
+      {isMobileMenuOpen && (
+        <div className="md:hidden absolute top-full left-0 w-full bg-[#384D48] shadow-lg rounded-b-md overflow-hidden">
+          <div className="flex flex-col py-2">
+            {isLoggedIn ? (
+              <>
+                <span className="px-6 py-3 text-base font-medium text-[#D0D0D0]">
+                  Welcome, {username}
+                </span>
+                <Link 
+                  href="/dashboard" 
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="block px-6 py-3 text-base text-[#F5F5F5] hover:bg-[#4A5D57] transition-colors duration-200"
+                >
+                  Dashboard
+                </Link>
+                <button
+                  onClick={() => {
+                    handleLogout();
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="block w-full text-left px-6 py-3 text-base text-[#F5F5F5] bg-[#7FB069] hover:bg-[#9BC53D] transition-colors duration-200"
+                >
+                  Logout
+                </button>
+              </>
+            ) : (
+              <Link 
+                href="/login" 
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="block px-6 py-3 text-base text-[#F5F5F5] bg-[#7FB069] hover:bg-[#9BC53D] transition-colors duration-200"
+              >
+                Login
+              </Link>
+            )}
+          </div>
+        </div>
+      )}
     </nav>
   );
 }
