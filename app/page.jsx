@@ -491,7 +491,7 @@ export default function MainPage() {
                 </svg>
               </button>
             </form>
-          </>
+          </div>
         )}
       </aside>
     </div>
