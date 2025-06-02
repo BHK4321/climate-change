@@ -23,7 +23,7 @@ Whether it’s carbon emissions, water usage, recyclability, or ethical sourcing
   Use your latitude and longitude to tailor responses to your region or country.
 
 -  **Agentic RAG Pipeline**  
-  Multi-step retrieval-augmented generation using LangGraph and GPT.
+  Multi-step retrieval-augmented generation using LangGraph.
 
 -  **Trusted Sources**  
   Pulls from OpenLCA, Ecoinvent, IPCC, UNEP, and other climate databases.
