@@ -278,5 +278,5 @@ Open your browser and go to:
 http://localhost:3000
 ```
 
-Refer to [script](https://github.com/BHK4321/climate-change/script) folder for running the script locally with docker and start asking queries!!
+Refer to [script](https://github.com/BHK4321/climate-change/tree/main/script) folder for running the script locally with docker and start asking queries!!
 or the [Live](https://climate-change-silk.vercel.app) website is also available.
