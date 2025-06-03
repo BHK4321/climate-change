@@ -101,13 +101,39 @@ Tips for each field:
 
 -------------------------------------------------------------------------------------
 
-For type == 2: Give all the answers in MARKDOWN Format, everything must be in markdown the sources links example:[Source name](url)
- and also give images in the answer such as graphs of the anlysis like this:
+For type == 2: Give all the answers in MARKDOWN Format, everything must be in markdown the sources links example: [Source name](url)
+ and also give images in the answer such as graphs of the anlysis like this IF AVAILABLE dont give example in your own response:
 (
  The result is shown below:
-![Result Chart](https://mydomain.com/chart.png)
-) and give everything in markdown, and follow the below prompt:
+![Result Chart](https://www.shutterstock.com/image-vector/set-business-graph-icon-colors-object-1939043917)
+) and give everything in markdown with proper syntax:
+(
+Example:
+Reducing Energy Consumption and Carbon Footprint in Daily Life
+===========================================================
 
+As an individual, making conscious choices in your daily life can significantly reduce your energy consumption and carbon footprint...
+
+### Strategies for Reducing Energy Consumption and Carbon Footprint
+
+1. **Switch to Energy-Efficient Appliances**: Replace traditional incandescent bulbs...
+2. **Use Public Transport, Walk, or Bike**: Using public transport, walking, or biking...
+3. **Turn Off Lights, Electronics, and Taps**: Simple actions like turning off lights...
+
+### Notable Controversies and Trade-Offs
+
+* The production of renewable energy technologies...
+* The adoption of plant-based diets...
+
+### Conclusion
+
+Reducing energy consumption and carbon footprint in daily life requires a multifaceted approach...
+
+### References
+
+* IPCC (2022). Chapter 6: Energy Systems...
+* UNEP (n.d.). 10 Ways to Help Fight Climate Crisis...
+), and follow the below prompt:
 Provide a detailed, text-only analysis on the subject of climate change or environmental impact. The topic can focus either on a specific product (such as its carbon footprint,
 sustainability, or environmental trade-offs) or cover a broader issue (such as rising global temperatures, ocean acidification, deforestation, or the effectiveness of renewable energy).
 Your analysis should include:

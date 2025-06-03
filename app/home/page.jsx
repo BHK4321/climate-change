@@ -28,7 +28,7 @@ function parseFinalResponseJSON(final_response) {
   if (match) {
     try {
       return JSON.parse(match[1]);
-    } catch (e) {}
+    } catch (e) { }
   }
   try {
     let trimmed = final_response.trim().replace(/^```json|^```|```$/g, "");
@@ -513,7 +513,7 @@ export default function MainPage() {
             setSideTypingCurrentChunk(combined.slice(0, charIdx + 1));
             charIdx++;
             if (charIdx < combined.length) {
-              setTimeout(typeChar, 0.1); // Fast typing
+              setTimeout(typeChar, 0.01); // Fast typing
             } else {
               setSideTypingCurrentChunk(combined); // final full string
               // Animate ellipsis forever
@@ -529,9 +529,9 @@ export default function MainPage() {
                   msgs.map((msg, idx) =>
                     idx === msgIdx
                       ? {
-                          ...msg,
-                          chunks: [combined],
-                        }
+                        ...msg,
+                        chunks: [combined],
+                      }
                       : msg
                   )
                 );
@@ -810,7 +810,7 @@ export default function MainPage() {
               display: "flex",
               flexDirection: "row",
               alignItems: "center",
-              background: cardBg,
+              background: "#112D4E",
               borderRadius: 8,
               boxShadow: "0 1px 8px 0 #1a237e16",
               padding: "0.5rem 1.2rem",
@@ -855,7 +855,7 @@ export default function MainPage() {
               tabIndex={0}
             >
               <svg height={22} width={22} viewBox="0 0 20 20" fill={input.trim() ? "#9BC53D" : "#b0b8c1"}>
-                <path d="M2.01 10.384l14.093-6.246c.822-.364 1.621.435 1.257 1.257l-6.247 14.093c-.367.829-1.553.834-1.926.008l-2.068-4.683a.65.65 0 0 1 .276-.827l6.624-3.883-7.222 2.937a.65.65 0 0 1-.852-.852z"/>
+                <path d="M2.01 10.384l14.093-6.246c.822-.364 1.621.435 1.257 1.257l-6.247 14.093c-.367.829-1.553.834-1.926.008l-2.068-4.683a.65.65 0 0 1 .276-.827l6.624-3.883-7.222 2.937a.65.65 0 0 1-.852-.852z" />
               </svg>
             </button>
           </form>
@@ -976,7 +976,7 @@ export default function MainPage() {
               ))
             ) : (
               <div style={{
-                background: cardBg,
+                background: "#112D4E",
                 color: "#fff",
                 borderRadius: 10,
                 padding: "2rem",
@@ -997,7 +997,7 @@ export default function MainPage() {
             transform: "translateY(-50%)",
             zIndex: 35,
             background: mainBg,
-            border: `1.5px solid ${cardBg}`,
+            border: `1.5px solid ${"#112D4E"}`,
             borderRadius: 9,
             width: 40,
             height: 40,
@@ -1057,7 +1057,7 @@ export default function MainPage() {
               position: "absolute",
               top: 12,
               right: 56,
-              background: "none",
+              background: "#112D4E",
               border: "none",
               fontSize: 22,
               cursor: "pointer",
@@ -1091,27 +1091,6 @@ export default function MainPage() {
             title="Full Screen Chat"
           >
             ⬜
-          </button>
-        )}
-        {!sideCollapsed && (
-          <button
-            style={{
-              position: "absolute",
-              right: 12,
-              top: 12,
-              background: "none",
-              border: "none",
-              fontSize: 22,
-              cursor: "pointer",
-              color: "#9BC53D",
-              zIndex: 32,
-              opacity: 0.85,
-            }}
-            onClick={handleCollapse}
-            aria-label="Collapse"
-            title="Collapse"
-          >
-            ×
           </button>
         )}
         {!sideCollapsed && (
@@ -1158,6 +1137,7 @@ export default function MainPage() {
                         marginBottom: 4,
                         fontWeight: 500,
                         whiteSpace: "pre-line",
+                        background: cardBg,
                         wordBreak: "break-word",
                         maxWidth: "100%",
                         width: "100%",
@@ -1191,7 +1171,7 @@ export default function MainPage() {
                         style={{
                           fontSize: 15.5,
                           color: "#D9EAFD",
-                          background: "#112D4E",
+                          background: "#FFFFFF",
                           padding: "0.7rem 1rem",
                           borderRadius: 7,
                           boxShadow: "0 1px 4px 0 #1a237e0e",
@@ -1227,8 +1207,8 @@ export default function MainPage() {
                       <div
                         style={{
                           fontSize: 15.5,
-                          color: "#D9EAFD",
-                          background: cardBg,
+                          color: "#102542",
+                          background: "#FFFFFF",
                           padding: "0.7rem 1rem",
                           borderRadius: 7,
                           boxShadow: "0 1px 4px 0 #1a237e0e",
@@ -1244,7 +1224,7 @@ export default function MainPage() {
                         }}
                       >
                         <ReactMarkdown>{sideTypingCurrentChunk}</ReactMarkdown>
-                        <span style={{ color: "#9BC53D" }}>{sideTypingEllipsis}</span>
+                        <span style={{ color: "#9BC53D", fontSize: "32px" }}>{sideTypingEllipsis}</span>
                       </div>
                     )}
                     {!msg.chunks?.length && sideTypingIdx !== idx && !sideLoading && (
@@ -1267,7 +1247,7 @@ export default function MainPage() {
             <form
               style={{
                 width: "100%",
-                background: cardAlt,
+                background: "#112D4E",
                 padding: "1rem 1.2rem",
                 borderTop: `1px solid ${cardBg}`,
                 display: "flex",
@@ -1313,7 +1293,7 @@ export default function MainPage() {
                 tabIndex={0}
               >
                 <svg height={22} width={22} viewBox="0 0 20 20" fill={sideInput.trim() ? "#9BC53D" : "#b0b8c1"}>
-                  <path d="M2.01 10.384l14.093-6.246c.822-.364 1.621.435 1.257 1.257l-6.247 14.093c-.367.829-1.553.834-1.926.008l-2.068-4.683a.65.65 0 0 1 .276-.827l6.624-3.883-7.222 2.937a.65.65 0 0 1-.852-.852z"/>
+                  <path d="M2.01 10.384l14.093-6.246c.822-.364 1.621.435 1.257 1.257l-6.247 14.093c-.367.829-1.553.834-1.926.008l-2.068-4.683a.65.65 0 0 1 .276-.827l6.624-3.883-7.222 2.937a.65.65 0 0 1-.852-.852z" />
                 </svg>
               </button>
             </form>
