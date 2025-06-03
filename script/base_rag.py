@@ -41,7 +41,7 @@ from langchain_community.tools.tavily_search import TavilySearchResults
 web_search_tool = TavilySearchResults(tavily_api_key=tavily_api_key)
 
 llm = WatsonxLLM(
-    model_id = "meta-llama/llama-3-405b-instruct",
+    model_id = "ibm/granite-13b-instruct-v2",
     url=credentials.get("url"),
     apikey=credentials.get("apikey"),
     project_id=project_id,

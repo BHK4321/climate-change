@@ -4,7 +4,7 @@
 
 🔗 [Live Demo](https://climate-change-silk.vercel.app)
 
-This has some limitations due to serverless streaming, but locally the application works well, for running locally please go through the following.
+This has some limitations due to serverless streaming not supported on vercel, but locally the application works well, for running locally please go through the following.
 
 ## Running Locally
 
@@ -75,7 +75,7 @@ Whether it’s carbon emissions, water usage, recyclability, or ethical sourcing
 |--------------|--------------------------------------------------|
 | Frontend     | Next.js, Tailwind CSS, React                    |
 | Backend      | LangGraph, IBM Watsonx.ai, Next.js api route             |
-| AI Models    | meta-llama/llama-3-405b-instruct                |
+| AI Models    | ibm/granite-13b-instruct-v2               |
 | Retrieval    | FAISS, Tavily Web Search                        |
 | Data Sources | Ecoinvent, OpenLCA, IPCC, OpenFoodFacts, UNEP   |
 | Deployment   | Vercel                                          |

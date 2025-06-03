@@ -39,7 +39,7 @@ Whether it’s carbon emissions, water usage, recyclability, or ethical sourcing
 |--------------|--------------------------------------------------|
 | Frontend     | Next.js, Tailwind CSS, React                    |
 | Backend      | LangGraph, IBM Watsonx.ai, Next.js api routing               |
-| AI Models    | meta-llama/llama-3-405b-instruct                |
+| AI Models    | ibm/granite-13b-instruct-v2               |
 | Retrieval    | FAISS, Tavily Web Search                        |
 | Data Sources | Ecoinvent, OpenLCA, IPCC, OpenFoodFacts, UNEP   |
 | Deployment   | Vercel                                          |
