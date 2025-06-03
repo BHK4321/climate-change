@@ -4,6 +4,7 @@
 
 🔗 [Live Demo](https://climate-change-silk.vercel.app)
 
+This has some limitations due to serverless streaming, but locally the application works well, for running locally please go through the following.
 ---
 
 ## 📌 Overview

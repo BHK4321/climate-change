@@ -158,6 +158,7 @@ export default function MainPage() {
   const [sideTypingIdx, setSideTypingIdx] = useState(-1);
   const [sideTypingChunks, setSideTypingChunks] = useState([]);
   const [sideTypingCurrentChunk, setSideTypingCurrentChunk] = useState("");
+  const [sideTypingEllipsis, setSideTypingEllipsis] = useState(""); // for animated dots
   const [sideLogs, setSideLogs] = useState({}); // for side logs by message idx
   const sidebarBottomRef = useRef(null);
 
@@ -323,6 +324,19 @@ export default function MainPage() {
           0%, 50% { opacity: 1; }
           51%, 100% { opacity: 0; }
         }
+        .animated-ellipsis::after {
+          content: '';
+          display: inline-block;
+          width: 1.5em;
+          text-align: left;
+          animation: ellipsis steps(3, end) 1.2s infinite;
+        }
+        @keyframes ellipsis {
+          0%   { content: ""; }
+          33%  { content: "."; }
+          66%  { content: ".."; }
+          100% { content: "..."; }
+        }
       `;
       document.head.appendChild(style);
     }
@@ -429,8 +443,12 @@ export default function MainPage() {
     setSideMessages((msgs) => [...msgs, { user: query, chunks: [] }]);
     const msgIdx = sideMessages.length;
     setSideLogs((prev) => ({ ...prev, [msgIdx]: "" }));
+    setSideTypingEllipsis(""); // clear ellipsis when new message
 
     let gotResult = false;
+    let streamedLogs = "";
+    let ellipsisInterval = null;
+
     await streamWithTimeout(
       '/api/query',
       {
@@ -447,9 +465,10 @@ export default function MainPage() {
       // onEvent
       async (eventType, dataStr) => {
         if (eventType === "logs") {
+          streamedLogs = typeof dataStr === "string" ? dataStr : JSON.stringify(dataStr);
           setSideLogs((prev) => ({
             ...prev,
-            [msgIdx]: JSON.parse(dataStr)
+            [msgIdx]: streamedLogs
           }));
         } else if (eventType === "result") {
           gotResult = true;
@@ -459,67 +478,71 @@ export default function MainPage() {
           } catch (e) {
             result = { error: "Failed to parse result JSON", raw: dataStr };
           }
-          // Animate chunks if result is array-like
-          if (result && (result.type === 2 || result.type === "2")) {
-            let allChunks = [];
-            if (Array.isArray(result.sub_answers)) allChunks = [...result.sub_answers];
-            if (result.final_response) allChunks.push(result.final_response);
-            let currentChunks = [];
-            let idx2 = 0;
-            function animateChunk() {
-              if (idx2 < allChunks.length) {
-                setSideTypingIdx(msgIdx);
-                setSideTypingChunks(currentChunks);
-                setSideTypingCurrentChunk("");
-                let full = allChunks[idx2];
-                let charIdx = 0;
-                function typeChar() {
-                  setSideTypingCurrentChunk(full.slice(0, charIdx + 1));
-                  charIdx++;
-                  if (charIdx < full.length) {
-                    setTimeout(typeChar, 2);
-                  } else {
-                    currentChunks = [...currentChunks, full];
-                    setSideMessages((prev) =>
-                      prev.map((msg, mi) =>
-                        mi === msgIdx
-                          ? {
-                            ...msg,
-                            chunks: [...currentChunks],
-                          }
-                          : msg
-                      )
-                    );
-                    idx2++;
-                    setTimeout(animateChunk, 30);
-                  }
-                }
-                typeChar();
-              } else {
+
+          // ---- CUSTOM: Format response as [sub_answers + final_response] ----
+          let sub_answers = [];
+          let final_response = "";
+          if (result && typeof result === "object") {
+            if (Array.isArray(result.sub_answers)) {
+              sub_answers = result.sub_answers;
+            } else if (result.result && Array.isArray(result.result.sub_answers)) {
+              sub_answers = result.result.sub_answers;
+            }
+            final_response = result.final_response || (result.result && result.result.final_response) || "";
+          }
+
+          // Append all together
+          let combined = "";
+          if (sub_answers.length > 0) {
+            combined = sub_answers.join("\n\n---\n\n");
+            if (final_response && final_response.trim()) {
+              combined += "\n\n---\n\n" + final_response.trim();
+            }
+          } else {
+            combined = final_response || "";
+          }
+
+          // Fast typewriter effect for the combined response, then animate '...'
+          let charIdx = 0;
+          setSideTypingIdx(msgIdx);
+          setSideTypingChunks([]); // clear
+          setSideTypingCurrentChunk(""); // clear
+          setSideTypingEllipsis(""); // clear
+
+          function typeChar() {
+            setSideTypingCurrentChunk(combined.slice(0, charIdx + 1));
+            charIdx++;
+            if (charIdx < combined.length) {
+              setTimeout(typeChar, 0.1); // Fast typing
+            } else {
+              setSideTypingCurrentChunk(combined); // final full string
+              // Animate ellipsis forever
+              let dot = 1;
+              ellipsisInterval = setInterval(() => {
+                setSideTypingEllipsis(".".repeat(dot));
+                dot = (dot % 3) + 1;
+              }, 350);
+              // After, move into messages after a few seconds (optional)
+              setTimeout(() => {
+                clearInterval(ellipsisInterval);
+                setSideMessages((msgs) =>
+                  msgs.map((msg, idx) =>
+                    idx === msgIdx
+                      ? {
+                          ...msg,
+                          chunks: [combined],
+                        }
+                      : msg
+                  )
+                );
                 setSideTypingIdx(-1);
                 setSideTypingChunks([]);
                 setSideTypingCurrentChunk("");
-              }
+                setSideTypingEllipsis("");
+              }, Math.max(1500, combined.length * 8));
             }
-            animateChunk();
-          } else {
-            setSideMessages((msgs) =>
-              msgs.map((msg, idx) =>
-                idx === msgIdx
-                  ? {
-                    ...msg,
-                    chunks: [
-                      result
-                        ? renderSidebarResponse(result)
-                        : result.sub_answers
-                          ? renderSidebarResponse(result)
-                          : result.error || "No response.",
-                    ],
-                  }
-                  : msg
-              )
-            );
           }
+          typeChar();
         }
       },
       // onError
@@ -534,11 +557,13 @@ export default function MainPage() {
         setSideLogs((prev) => ({ ...prev, [msgIdx]: "" }));
         setSideLoading(false);
         setSideInput("");
+        setSideTypingEllipsis("");
       },
       // onDone
       () => {
         setSideLoading(false);
         setSideInput("");
+        setSideTypingEllipsis("");
         if (!gotResult) {
           setSideMessages((msgs) =>
             msgs.map((msg, idx) =>
@@ -597,7 +622,7 @@ export default function MainPage() {
               typeof result === "object" &&
               userEmail
             ) {
-              console.log(result);
+              // Save card in DB
               const cardForDb = extractCardData({ result: result.result }, userEmail, input, false);
               fetch("/api/createCard", {
                 method: "POST",
@@ -1166,7 +1191,7 @@ export default function MainPage() {
                         style={{
                           fontSize: 15.5,
                           color: "#D9EAFD",
-                          background: cardBg,
+                          background: "#112D4E",
                           padding: "0.7rem 1rem",
                           borderRadius: 7,
                           boxShadow: "0 1px 4px 0 #1a237e0e",
@@ -1219,7 +1244,7 @@ export default function MainPage() {
                         }}
                       >
                         <ReactMarkdown>{sideTypingCurrentChunk}</ReactMarkdown>
-                        <span className="blinking-cursor" style={{ color: "#9BC53D" }}>|</span>
+                        <span style={{ color: "#9BC53D" }}>{sideTypingEllipsis}</span>
                       </div>
                     )}
                     {!msg.chunks?.length && sideTypingIdx !== idx && !sideLoading && (

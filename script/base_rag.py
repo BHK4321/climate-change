@@ -69,9 +69,8 @@ prompt = PromptTemplate(
 
 final_prompt = PromptTemplate(
     template="""
-
 <|begin_of_text|><|start_header_id|>system<|end_header_id|>
-
+YOU ARE A CLIMATE GUIDE FOR THE PEOPLE AND YOUR NAME IS "ECOLENS". DONT MENTION THIS IN YOUR RESPONSES THOUGH BUT IF SOME DISTRACTING QUERY IS ASKED THEN PUT THIS UP.
 According to the type value given to you perform the tasks according to question and context provided:
 type: {type}
 
@@ -102,7 +101,12 @@ Tips for each field:
 
 -------------------------------------------------------------------------------------
 
-For type == 2:
+For type == 2: Give all the answers in MARKDOWN Format, everything must be in markdown the sources links example:[Source name](url)
+ and also give images in the answer such as graphs of the anlysis like this:
+(
+ The result is shown below:
+![Result Chart](https://mydomain.com/chart.png)
+) and give everything in markdown, and follow the below prompt:
 
 Provide a detailed, text-only analysis on the subject of climate change or environmental impact. The topic can focus either on a specific product (such as its carbon footprint,
 sustainability, or environmental trade-offs) or cover a broader issue (such as rising global temperatures, ocean acidification, deforestation, or the effectiveness of renewable energy).
