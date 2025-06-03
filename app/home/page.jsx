@@ -1207,7 +1207,7 @@ export default function MainPage() {
                       <div
                         style={{
                           fontSize: 15.5,
-                          color: "#102542",
+                          color: "#102542", 
                           background: "#FFFFFF",
                           padding: "0.7rem 1rem",
                           borderRadius: 7,

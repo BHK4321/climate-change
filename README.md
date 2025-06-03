@@ -5,6 +5,41 @@
 🔗 [Live Demo](https://climate-change-silk.vercel.app)
 
 This has some limitations due to serverless streaming, but locally the application works well, for running locally please go through the following.
+
+## Running Locally
+
+### Prerequisites
+
+- **Node.js** (v18.0.0 or higher)
+- **npm** or **yarn**
+
+Clone the repository and install dependencies:
+
+```bash
+git clone https://github.com/BHK4321/climate-change.git
+cd climate-change
+npm install
+```
+
+### Environment Variables
+
+- Create a ```.env``` file in the root directory as in .env.example
+- Add the credentials provided in the submission (```FASTAPI_API_KEY``` (secret key) and ```FASTAPI_BASE_URL``` (script backend deployment))
+
+We do not need to have ```MONGO_URI``` and ```JWT_SECRET``` in the ```.env``` if we just want to ask queries and no track of the asked queries or if we do not want to access the dashboard.
+
+To start the development server:
+
+```bash
+npm run dev
+```
+
+Open your browser and go to:
+
+```bash
+http://localhost:3000
+```
+
 ---
 
 ## 📌 Overview
@@ -235,49 +270,3 @@ print(json.dumps({"result": response}), flush=True)
 > **For more search results & code context, [browse the repository](https://github.com/BHK4321/climate-change/search?q=stream+pipeline+log+response).**
 
 ---
-
-## Getting Started
-
-### Prerequisites
-
-- **Node.js** (v16 or higher)
-- **npm** or **yarn**
-- **Tavily Web Search Tool API Key**
-- **IBM Watsonx.ai API Key** for enterprise-grade models
-
-### Installation
-
-Clone the repository and install dependencies:
-
-```bash
-git clone https://github.com/BHK4321/climate-change.git
-cd climate-change
-npm install
-```
-
-### Environment Variables
-
-Create a .env.local file in the root directory and add:
-
-```bash
-TAVILY_API_KEY=your-tavily-api-key
-IBM_API_KEY=your-ibm-api-key  
-IBM_PROJECT_ID=your-ibm-project-id
-```
-
-### Running Locally
-
-To start the development server:
-
-```bash
-npm run dev
-```
-
-Open your browser and go to:
-
-```bash
-http://localhost:3000
-```
-
-Refer to [script](https://github.com/BHK4321/climate-change/tree/main/script) folder for running the script locally with docker and start asking queries!!
-or the [Live](https://climate-change-silk.vercel.app) website is also available.
